@@ -1,4 +1,11 @@
-# go-api-jwt-validation
+Validate JWTs in Go
+=============================================
+
+.. image:: https://img.shields.io/badge/quality-experiment-red
+    :target: https://curity.io/resources/code-examples/status/
+
+.. image:: https://img.shields.io/badge/availability-source-blue
+    :target: https://curity.io/resources/code-examples/status/
 
 Set appropriate config in api/.env
 
