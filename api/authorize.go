@@ -30,14 +30,6 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 	
 	var pl jwt.Payload
 
-	//Verifies JWT signature
-	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl);
-	err != nil {
-		log.Println("Error verifying JWT signature: ", err.Error())
-		writer.WriteHeader(401)
-		return false
-	}
-	
 	//Validating the alg field in header
 	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl, jwt.ValidateHeader); 
 	err != nil {
@@ -45,7 +37,15 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 		writer.WriteHeader(401)
 		return false
 	}
-	
+
+	//Verifies JWT signature
+	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl);
+	err != nil {
+		log.Println("Error verifying JWT signature: ", err.Error())
+		writer.WriteHeader(401)
+		return false
+	}
+
 	aud := jwt.Audience{os.Getenv("AUD")}
 	iss := os.Getenv("ISS")
 	now := time.Now()
