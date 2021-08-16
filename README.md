@@ -14,7 +14,6 @@ Build and run the Docker image.
 
 ```shell
 docker build -t go-api . 
-docker rm -f go-api
 docker run --name go-api -p 8080:8080 go-api
 ```
 
