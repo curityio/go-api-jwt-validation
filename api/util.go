@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 func decodeBase64BigInt(s string) *big.Int {
@@ -61,4 +62,15 @@ func getKey(jwksEndpoint string) *rsa.PublicKey{
 		N: N,
 		E: E,
 	}
+}
+
+func checkScopes(requiredScopes []string, providedScopes string) bool {
+	
+	for _, value := range requiredScopes {
+		if(!strings.Contains(providedScopes, value)){
+			return false
+		}
+	}
+	
+	return true
 }

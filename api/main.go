@@ -11,6 +11,10 @@ import (
 func main() {
 	//Load config file
 	err := godotenv.Load()
+	
+	//Create Algorithm interface to use for JWT verification
+	setAlgorithm(os.Getenv("JWKS"))
+
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
 	}

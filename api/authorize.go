@@ -11,6 +11,8 @@ import (
 	"os"
 )
 
+var hs jwt.Algorithm
+
 func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 
 	// Check if Authorization header is available
@@ -24,10 +26,11 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 
 	headerParts := strings.Split(header, " ")
 	jwtToken := headerParts[1]
-
-	//Create Algorithm interface to use for JWT verification
-	hs := jwt.NewRS256(jwt.RSAPublicKey(getKey(os.Getenv("JWKS"))))
 	
+	if(hs == nil){
+		setAlgorithm(os.Getenv("JWKS"))
+	}
+
 	var pl jwt.Payload
 
 	//Validating the alg field in header
@@ -73,7 +76,7 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 
 	if err != nil {
 		log.Println("Error decoding JWT body: ", err.Error())
-		writer.WriteHeader(500)
+		writer.WriteHeader(400)
 		return false
 	}
 
@@ -86,11 +89,14 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 	err = json.Unmarshal([]byte(payload), &rawPayload)
 	if err != nil {
 		log.Println("Error parsing payload: ", err.Error())
-		writer.WriteHeader(500)
+		writer.WriteHeader(400)
 	}
 
-	//Check if configured scope values are missing
-	if(!strings.Contains(rawPayload.Scope, os.Getenv("SCOPE"))){	
+	configuredScopes := strings.Split(os.Getenv("SCOPE"), " ")
+	payloadScopes := rawPayload.Scope
+
+	//Check if configured(required) scope values are missing
+	if(!checkScopes(configuredScopes, payloadScopes)) {
 		writer.WriteHeader(401)
 		writer.Write([]byte("Missing required scope(s)"))
 		return false
@@ -98,4 +104,12 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 
 	//All checks passed
 	return true
+}
+
+func getAlgorithm() jwt.Algorithm{
+	return hs
+}
+
+func setAlgorithm(jwksURI string) {
+	hs = jwt.NewRS256(jwt.RSAPublicKey(getKey(jwksURI)))
 }
