@@ -34,12 +34,12 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 	var pl jwt.Payload
 
 	//Validating the alg field in header
-	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl, jwt.ValidateHeader); 
+	/*if _, err := jwt.Verify([]byte(jwtToken), hs, &pl, jwt.ValidateHeader); 
 	err != nil {
 		log.Println("Error validating alg in header: ", err.Error())
 		writer.WriteHeader(401)
 		return false
-	}
+	}*/
 
 	//Verifies JWT signature
 	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl);
@@ -112,4 +112,9 @@ func getAlgorithm() jwt.Algorithm{
 
 func setAlgorithm(jwksURI string) {
 	hs = jwt.NewRS256(jwt.RSAPublicKey(getKey(jwksURI)))
+	//setEdDSAAlgorithm(jwksURI)
+}
+
+func setEdDSAAlgorithm(jwksURI string) {
+	hs = jwt.NewEd25519(jwt.Ed25519PublicKey(getEdDSAKey(jwksURI)))
 }

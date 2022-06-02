@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"crypto/rsa"
+	"crypto/ed25519"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -62,6 +63,48 @@ func getKey(jwksEndpoint string) *rsa.PublicKey{
 		N: N,
 		E: E,
 	}
+}
+
+// Get EdDSAKey from JWKS endpoint
+func getEdDSAKey(jwksEndpoint string) ed25519.PublicKey {
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //For demo only to handle self-sign certs
+	client:= &http.Client{Transport: customTransport}
+    resp, err := client.Get(jwksEndpoint)
+
+    if err != nil {
+        log.Println(err)
+    }
+
+    defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Println(err)
+	}
+	
+	type Key struct {
+		X string `json:"x"`
+	}
+
+	var Keys struct {
+		Key []Key `json:"keys"`
+	}
+
+	if err := json.Unmarshal(body, &Keys);
+	err != nil{
+		log.Println(err)
+	}
+
+	//TODO: Handle multiple keys
+	X, err := base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(Keys.Key[0].X);
+
+	if err != nil {
+		log.Fatalf("failed to decode base64: %v", err)
+	}
+
+	return ed25519.PublicKey(X)
 }
 
 func checkScopes(requiredScopes []string, providedScopes string) bool {
