@@ -26,7 +26,7 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 
 	headerParts := strings.Split(header, " ")
 	jwtToken := headerParts[1]
-	
+
 	if(hs == nil){
 		setAlgorithm(os.Getenv("JWKS"))
 	}
@@ -34,12 +34,12 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 	var pl jwt.Payload
 
 	//Validating the alg field in header
-	/*if _, err := jwt.Verify([]byte(jwtToken), hs, &pl, jwt.ValidateHeader); 
+	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl, jwt.ValidateHeader);
 	err != nil {
 		log.Println("Error validating alg in header: ", err.Error())
 		writer.WriteHeader(401)
 		return false
-	}*/
+	}
 
 	//Verifies JWT signature
 	if _, err := jwt.Verify([]byte(jwtToken), hs, &pl);
@@ -52,12 +52,12 @@ func Authorize(writer http.ResponseWriter, request *http.Request) bool{
 	aud := jwt.Audience{os.Getenv("AUD")}
 	iss := os.Getenv("ISS")
 	now := time.Now()
-	
+
 	nbfValidator := jwt.NotBeforeValidator(now)
 	expValidator := jwt.ExpirationTimeValidator(now)
-	issValidator := jwt.IssuerValidator(iss)	
-	audValidator := jwt.AudienceValidator(aud)	
-	
+	issValidator := jwt.IssuerValidator(iss)
+	audValidator := jwt.AudienceValidator(aud)
+
 	validatePayload := jwt.ValidatePayload(&pl, nbfValidator, expValidator, issValidator, audValidator)
 
 	//Validate nbf, exp, iss and aud
