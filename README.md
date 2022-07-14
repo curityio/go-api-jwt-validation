@@ -17,7 +17,7 @@ docker build -t go-api .
 docker run --name go-api -p 8080:8080 go-api
 ```
 
-NOTE: The example uses the `RS256` algorithm. The code needs to be tweaked to support others.
+NOTE: The example uses the `RS256` algorithm by default. The code can be modified to support others and there's a method that implements the EdDSA algorithm that can be invoked.
 
 ## Documentation
 This repository is documented and described in the [Securing a Go API with JWTs](https://curity.io/resources/learn/go-api/) article.
